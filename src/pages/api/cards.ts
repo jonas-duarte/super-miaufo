@@ -17,8 +17,6 @@ export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse<Data>
 ) {
-    console.log(req.query)
-
     const size = req.query.size || 32;
 
     const cats = await axios.get(`https://api.thecatapi.com/v1/images/search?limit=${size}&has_breeds=1&api_key=${process.env.API_KEY}`);

@@ -87,3 +87,12 @@
 .custom > input {
   width: 100%;
 }
+
+@media print {
+  .main > h1 {
+    display: none;
+  } 
+  .custom {
+    display: none;
+  }
+}

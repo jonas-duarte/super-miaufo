@@ -40,6 +40,7 @@ export default function Home() {
   ], [])
 
   useEffect(() => {
+    if(window === undefined) return;
     if(!router.isReady) return;
     const size: string | undefined = (query as any).size
     const trunfoIndex: string | undefined = (query as any).trunfoIndex
