@@ -1,68 +1,28 @@
 import Head from 'next/head'
 import styles from '@/styles/Home.module.css'
-import axios from 'axios'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { SuperTrunfoCard } from '@/core/SuperTrunfoCard'
+import { useRouter } from 'next/router'
 
-type SuperTrunfoCard = {
-  code: string
-  name: string
-  country: string
-  image: string
-  trunfo: boolean
-  attributes: {
-    intelligence: number
-    adaptability: number
-    affection_level: number
-    energy_level: number
-    social_needs: number
-    health_issues: number
-    vocalisation: number
-  }
+async function fetchCards(query?: {
+  size?: string
+  trunfoIndex?: string
+}): Promise<SuperTrunfoCard[]> {
+  const data = await fetch(`${window.location.origin}/api/cards?${new URLSearchParams({
+    size: query?.size || '',
+    trunfoIndex: query?.trunfoIndex || ''
+  }).toString()}`)
+    .then(response => response.json())
+
+  return data.cards
 }
 
-const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
-function getCode(index: number) {
-  const letter = Math.floor(index / 4);
-  const number = index % 4 + 1;
-  return `${ALPHABET[letter]}${number}`
-}
+export default function Home() {
+  const router = useRouter()
 
-export async function getServerSideProps() {
-  const cats = await axios.get(process.env.API_URL as string)
+  const query = router.query
 
-  const trunfoIndex = Math.floor(Math.random() * (cats.data.length - 4)) + 4
-
-  return {
-    props: {
-      cards: cats.data.map((cat: any, index: number) => {
-        return {
-          code: getCode(index),
-          name: cat.breeds[0].name,
-          country: cat.breeds[0].origin,
-          image: cat.url,
-          trunfo: index === trunfoIndex,
-          attributes: {
-            intelligence: cat.breeds[0].intelligence,
-            adaptability: cat.breeds[0].adaptability,
-            affection_level: cat.breeds[0].affection_level,
-            energy_level: cat.breeds[0].energy_level,
-            social_needs: cat.breeds[0].social_needs,
-            health_issues: cat.breeds[0].health_issues,
-            vocalisation: cat.breeds[0].vocalisation
-          }
-        }
-      })
-    }
-  }
-}
-
-type HomeProps = {
-  cards: SuperTrunfoCard[]
-}
-
-export default function Home(props: HomeProps) {
-
-  const [cards, setCards] = useState(props.cards);
+  const [cards, setCards] = useState<SuperTrunfoCard[]>([])
 
   const attributes = useMemo(() => [
     { name: 'intelligence', label: 'Inteligência' },
@@ -74,6 +34,20 @@ export default function Home(props: HomeProps) {
     { name: 'vocalisation', label: 'Vocalização' }
   ], [])
 
+  const custom = useMemo(() => [
+    { name: 'size', label: 'Tamanho do baralho' },
+    { name: 'trunfoIndex', label: 'Carta trunfo' }
+  ], [])
+
+  useEffect(() => {
+    if(!router.isReady) return;
+    const size: string | undefined = (query as any).size
+    const trunfoIndex: string | undefined = (query as any).trunfoIndex
+    fetchCards({ size, trunfoIndex }).then(cards => {
+      setCards(cards)
+    })
+  }, [router.isReady, query])
+
   return (
     <>
       <Head>
@@ -84,6 +58,19 @@ export default function Home(props: HomeProps) {
       </Head>
       <main className={styles.main}>
         <h1 style={{ textAlign: 'center' }}>Super Miaufo</h1>
+        <form className={styles.custom}>
+          {custom.map(attribute => (
+            <input
+              key={attribute.name}
+              type="text"
+              id={attribute.name}
+              name={attribute.name}
+              placeholder={attribute.label}
+              defaultValue={(router.query as any)[attribute.name]}
+            />
+          ))}
+          <button type="submit">Gerar</button>
+        </form>
         <div className={styles.container}>
           {cards.map((card, index) => (
             <div className={styles.card} key={index}>
