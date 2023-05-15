@@ -1,7 +1,7 @@
 import Head from 'next/head'
 import styles from '@/styles/Home.module.css'
 import axios from 'axios'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 
 type SuperTrunfoCard = {
   code: string
@@ -60,7 +60,9 @@ type HomeProps = {
   cards: SuperTrunfoCard[]
 }
 
-export default function Home({ cards }: HomeProps) {
+export default function Home(props: HomeProps) {
+
+  const [cards, setCards] = useState(props.cards);
 
   const attributes = useMemo(() => [
     { name: 'intelligence', label: 'Inteligência' },
@@ -96,7 +98,7 @@ export default function Home({ cards }: HomeProps) {
                 {card.trunfo && <div className={styles.trunfo}>SUPER MIAUFO</div>}
               </div>
               <div>
-                <div style={{ width: '100%', textAlign: 'center' }}>
+                <div style={{ width: '100%', textAlign: 'center', borderBottom: '1px solid #ccc', padding: '5px 0' }}>
                   <strong>{card.name}</strong>
                 </div>
                 <table className={styles.attributes}>
