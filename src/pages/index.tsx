@@ -22,6 +22,7 @@ export default function Home() {
 
   const query = router.query
 
+  const [isLoading, setIsLoading] = useState(false)
   const [cards, setCards] = useState<SuperTrunfoCard[]>([])
 
   const attributes = useMemo(() => [
@@ -40,12 +41,14 @@ export default function Home() {
   ], [])
 
   useEffect(() => {
-    if(window === undefined) return;
-    if(!router.isReady) return;
+    if (window === undefined) return;
+    if (!router.isReady) return;
     const size: string | undefined = (query as any).size
     const trunfoIndex: string | undefined = (query as any).trunfoIndex
+    setIsLoading(true)
     fetchCards({ size, trunfoIndex }).then(cards => {
       setCards(cards)
+      setIsLoading(false)
     })
   }, [router.isReady, query])
 
@@ -73,7 +76,8 @@ export default function Home() {
           <button type="submit">Gerar</button>
         </form>
         <div className={styles.container}>
-          {cards.map((card, index) => (
+          {isLoading && (<div className={styles.loading}>Carregando...</div>)}
+          {!isLoading && cards.map((card, index) => (
             <div className={styles.card} key={index}>
               <div className={styles.cardHeader}>
                 <span>{card.code}</span>
