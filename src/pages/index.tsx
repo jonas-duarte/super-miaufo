@@ -6,11 +6,13 @@ import { useRouter } from 'next/router'
 
 async function fetchCards(query?: {
   size?: string
-  trunfoIndex?: string
+  trunfoIndex?: string,
+  random?: string
 }): Promise<SuperTrunfoCard[]> {
   const data = await fetch(`${window.location.origin}/api/cards?${new URLSearchParams({
     size: query?.size || '',
-    trunfoIndex: query?.trunfoIndex || ''
+    trunfoIndex: query?.trunfoIndex || '',
+    random: query?.random || ''
   }).toString()}`)
     .then(response => response.json())
 
@@ -37,7 +39,8 @@ export default function Home() {
 
   const custom = useMemo(() => [
     { name: 'size', label: 'Tamanho do baralho' },
-    { name: 'trunfoIndex', label: 'Carta trunfo' }
+    { name: 'trunfoIndex', label: 'Carta trunfo' },
+    { name: 'random', label: 'Aleatório' }
   ], [])
 
   useEffect(() => {
@@ -45,8 +48,9 @@ export default function Home() {
     if (!router.isReady) return;
     const size: string | undefined = (query as any).size
     const trunfoIndex: string | undefined = (query as any).trunfoIndex
+    const random: string | undefined = (query as any).random
     setIsLoading(true)
-    fetchCards({ size, trunfoIndex }).then(cards => {
+    fetchCards({ size, trunfoIndex, random }).then(cards => {
       setCards(cards)
       setIsLoading(false)
     })
